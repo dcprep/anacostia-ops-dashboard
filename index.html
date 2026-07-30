@@ -215,7 +215,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
     <div class="section-card" onclick="go('readiness')">
       <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 19h-3a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1"/><path d="M11 16m0 1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/></svg></div>
       <div class="section-text">
-        <div class="section-name">BOY Space Readiness</div>
+        <div class="section-name">BOY Building Readiness</div>
         <div class="section-sub" id="sub-readiness">Signoff progress across all spaces</div>
       </div>
       <div class="section-arrow">›</div>
@@ -327,12 +327,12 @@ function buildSubs() {
       ? `${cc.currentPct}% items checked this period`
       : 'No walkthroughs logged yet';
 
-  // Readiness (BOY Space Readiness — signoff progress across all spaces)
+  // Readiness (BOY Building Readiness — signoff progress across all spaces)
   let rTotal = 0, rDone = 0;
   CAMPUSES.forEach(code => {
     const rooms = (BOY[code] && BOY[code].rooms) || [];
     rooms.forEach(r => {
-      ['MDS','SDO','tech'].forEach(track => {
+      ['SDO','tech'].forEach(track => {
         const rec = track === 'tech' ? r.tech : r[track];
         const cls = dotClass(rec ? rec.assessment : null);
         if (cls === 'rdot-na') return;
@@ -616,7 +616,6 @@ function buildSectionedTables(rooms) {
       <table class="space-table">
         <thead><tr>
           <th>Space</th>
-          <th class="sc">Schools</th>
           <th class="sc">Ops</th>
           <th class="sc">Tech</th>
         </tr></thead>
@@ -624,7 +623,6 @@ function buildSectionedTables(rooms) {
     groups[sec].forEach(r => {
       html += `<tr>
         <td><span class="space-name">${r.space}</span></td>
-        <td class="sc">${makeDot(r.MDS  ? r.MDS.assessment  : null)}</td>
         <td class="sc">${makeDot(r.SDO  ? r.SDO.assessment  : null)}</td>
         <td class="sc">${makeDot(r.tech ? r.tech.assessment : null)}</td>
       </tr>`;
@@ -638,7 +636,7 @@ function buildSectionedTables(rooms) {
 // Tech) across all rooms — not whole spaces — so partial adoption still shows
 // real progress.
 function buildCampusProgress(rooms) {
-  const tracks = ['MDS', 'SDO', 'tech'];
+  const tracks = ['SDO', 'tech'];
   let ok = 0, minor = 0, total = 0;
   rooms.forEach(r => {
     tracks.forEach(track => {
@@ -669,7 +667,7 @@ function buildCampusProgress(rooms) {
 
 function renderReadiness() {
   const con = document.getElementById('d-readiness');
-  let html = backBar('BOY Space Readiness') + '<div class="detail-body">';
+  let html = backBar('BOY Building Readiness') + '<div class="detail-body">';
 
   html += `<div class="camp-tabs">
     <div class="camp-tab active" id="tab-AEC" onclick="switchCampusTab('AEC')">AEC</div>
