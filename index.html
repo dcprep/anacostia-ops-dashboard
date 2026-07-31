@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Anacostia Ops Dashboard">
 <meta name="application-name" content="Anacostia Ops Dashboard">
 <meta name="theme-color" content="#005E9E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMDA1RTlFIiByeD0iNiIvPjxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC45KSIvPjxyZWN0IHg9IjE4IiB5PSI0IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHJ4PSIyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiLz48cmVjdCB4PSI0IiB5PSIxOCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjkpIi8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==">
 <link rel="apple-touch-icon" href="icon.png">
 <meta property="og:title" content="Anacostia Ops Dashboard">
@@ -48,6 +49,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 /* DETAIL */
 .detail{display:none}
+#d-readiness{background:#fff}
+#d-readiness .detail-body{padding:12px 12px 60px}
+@media(min-width:768px){
+  #d-readiness .detail-body{padding:24px 24px 60px;max-width:900px;margin:0 auto}
+}
 .detail.active{display:block}
 .back-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--card);border-bottom:0.5px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent;position:sticky;top:0;z-index:50}
 .back-txt{font-size:14px;color:var(--teal);font-weight:500}
@@ -135,17 +141,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .rdot-bad   {background:var(--red);   color:#fff}
 .rdot-blank {background:#fff;border:1.5px solid #cbd5e1}
 .rdot-na    {background:var(--lt);color:var(--muted);font-size:8px;font-weight:600}
+.rdot-pending {background:#378ADD;color:#fff}
 
-.section-block{margin-bottom:24px}
-.section-hdr{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);padding:0 0 8px}
-.space-table{width:100%;border-collapse:collapse;background:var(--card);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
-.space-table th{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:8px 12px;background:var(--lt);border-bottom:0.5px solid var(--border);text-align:left}
-.space-table th.sc{text-align:center;width:62px;padding:8px 4px}
+.section-block{margin-bottom:10px}
+.section-hdr{font-size:11px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:#0C447C;background:#E6F1FB;padding:8px 12px;margin:28px -12px 10px}
+.section-block:first-child .section-hdr{margin-top:0}
+@media(min-width:768px){
+  .section-hdr{margin:28px -24px 10px;padding:8px 24px}
+}
+.space-table{width:100%;border-collapse:collapse}
+.space-table th{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:6px 12px;border-bottom:0.5px solid var(--border);text-align:left}
+.space-table th.sc{text-align:center;width:56px;padding:6px 4px}
 .space-table td{padding:7px 12px;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text);vertical-align:middle}
 .space-table tr:last-child td{border-bottom:none}
 .space-table tr:hover td{background:#f8fbff}
 .space-table td.sc{text-align:center;vertical-align:middle;padding:7px 4px}
 .space-name{font-weight:500}
+.space-room-num{font-weight:400;font-size:13px;color:#B8C0CC}
+.space-table tr.tight td{border-bottom:none}
+.space-chevron-cell{width:22px;text-align:center;padding:8px 0 8px 4px !important}
+.space-chevron{font-size:13px;color:var(--muted)}
+.space-detail-row td{padding:8px 12px 12px 38px;background:#F6F8FA;border-top:none}
+.space-detail-row.hidden{display:none}
+.space-detail-counts{font-size:11px;color:#64748b;margin-bottom:4px}
+.space-detail-notes{font-size:11px;color:var(--text)}
 
 .net-summary{padding:0 0 16px}
 .net-summary-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
@@ -156,8 +175,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .kpi-pct-unit{font-size:16px;color:var(--muted);font-weight:400}
 .kpi-bar-track{height:36px;background:rgba(0,0,0,.07);border-radius:8px;overflow:hidden;display:flex}
 .seg-ok{background:var(--green);height:100%;display:flex;align-items:center;padding:0 10px}
+.seg-pending{background:#378ADD;height:100%;display:flex;align-items:center;padding:0 8px}
 .seg-mn{background:var(--yellow);height:100%;display:flex;align-items:center;padding:0 8px}
 .seg-label-ok{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden}
+.seg-label-pending{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden}
 .seg-label-mn{font-size:12px;font-weight:600;color:#78350f;white-space:nowrap;overflow:hidden}
 </style>
 </head>
@@ -327,22 +348,19 @@ function buildSubs() {
       ? `${cc.currentPct}% items checked this period`
       : 'No walkthroughs logged yet';
 
-  // Readiness (BOY Building Readiness — signoff progress across all spaces)
+  // Readiness (BOY Building Readiness — space readiness across all spaces)
   let rTotal = 0, rDone = 0;
   CAMPUSES.forEach(code => {
     const rooms = (BOY[code] && BOY[code].rooms) || [];
     rooms.forEach(r => {
-      ['SDO','tech'].forEach(track => {
-        const rec = track === 'tech' ? r.tech : r[track];
-        const cls = dotClass(rec ? rec.assessment : null);
-        if (cls === 'rdot-na') return;
-        rTotal++;
-        if (cls === 'rdot-ok' || cls === 'rdot-minor') rDone++;
-      });
+      const cls = combinedSpaceStatus(r);
+      if (cls === 'rdot-na') return;
+      rTotal++;
+      if (cls === 'rdot-ok' || cls === 'rdot-minor') rDone++;
     });
   });
   document.getElementById('sub-readiness').textContent =
-    rTotal ? `${Math.round(rDone/rTotal*100)}% of signoffs complete` : 'No assessments logged yet';
+    rTotal ? `${Math.round(rDone/rTotal*100)}% of spaces ready` : 'No assessments logged yet';
 }
 
 // ── DRILLS ───────────────────────────────────────────────────────────────
@@ -555,11 +573,12 @@ function renderCustodial() {
 }
 
 // ── READINESS — ported from the main BOY Readiness Dashboard ───────────────
-const SECTION_ORDER = ['Classrooms','Outdoor','Common Spaces','Offices & Conference Rooms','Other'];
+const SECTION_ORDER = ['Classrooms','Shared Student Spaces','Restrooms','Common Spaces','Offices','Staff Common Spaces','Technology'];
 
 function dotClass(assessment) {
   if (!assessment) return 'rdot-blank';
   const a = assessment.toLowerCase();
+  if (a.includes('pending sdo signoff')) return 'rdot-pending';
   if (a.includes('fully'))  return 'rdot-ok';
   if (a.includes('minor'))  return 'rdot-minor';
   if (a.includes('not ready')) return 'rdot-bad';
@@ -572,9 +591,10 @@ function dotClass(assessment) {
 
 function dotLabel(cls) {
   if (cls === 'rdot-ok')    return '✓';
-  if (cls === 'rdot-minor') return '~';
+  if (cls === 'rdot-minor') return '';
   if (cls === 'rdot-bad')   return '!';
   if (cls === 'rdot-na')    return '—';
+  if (cls === 'rdot-pending') return '';
   return '';
 }
 
@@ -585,11 +605,21 @@ function makeDot(assessment, size) {
   return `<span class="rdot ${cls}" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*0.45)}px">${lbl}</span>`;
 }
 
+function toggleReadinessRow(rid) {
+  const row = document.getElementById(rid);
+  const chev = document.getElementById(rid + '-chev');
+  if (!row) return;
+  const isHidden = row.classList.contains('hidden');
+  row.classList.toggle('hidden');
+  if (chev) chev.className = isHidden ? 'ti ti-chevron-up space-chevron' : 'ti ti-chevron-down space-chevron';
+}
+
 const READINESS_INLINE_LEGEND = `
   <div style="display:flex;align-items:center;gap:14px;padding:0 0 16px;flex-wrap:wrap">
     <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase">Status</span>
     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-ok" style="width:18px;height:18px;font-size:9px">✓</span> Fully ready</span>
-    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-minor" style="width:18px;height:18px;font-size:9px">~</span> Minor items</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-pending" style="width:18px;height:18px;font-size:9px"></span> Pending SDO signoff</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-minor" style="width:18px;height:18px;font-size:9px"></span> Minor items</span>
     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-bad" style="width:18px;height:18px;font-size:9px">!</span> Not ready</span>
     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-blank" style="width:18px;height:18px"></span> Not assessed</span>
     <span style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)"><span class="rdot rdot-na" style="width:18px;height:18px;font-size:8px">—</span> N/A</span>
@@ -605,6 +635,7 @@ function buildSectionedTables(rooms) {
 
   const seenSections = new Set();
   let html = READINESS_INLINE_LEGEND;
+  let rowId = 0;
 
   const ordered = [...SECTION_ORDER, ...Object.keys(groups).filter(s => !SECTION_ORDER.includes(s))];
   ordered.forEach(sec => {
@@ -615,17 +646,39 @@ function buildSectionedTables(rooms) {
       <div class="section-hdr">${sec}</div>
       <table class="space-table">
         <thead><tr>
+          <th></th>
           <th>Space</th>
           <th class="sc">Ops</th>
           <th class="sc">Tech</th>
         </tr></thead>
         <tbody>`;
     groups[sec].forEach(r => {
-      html += `<tr>
-        <td><span class="space-name">${r.space}</span></td>
+      rowId++;
+      const hasNotes = !!(r.notes && r.notes.trim());
+      const isClassroom = sec === 'Classrooms';
+      const hasCounts = isClassroom && (r.deskCount || r.chairCount);
+      const expandable = hasNotes || hasCounts;
+      const rid = `rdrow-${rowId}`;
+
+      html += `<tr class="space-row${expandable ? ' expandable' : ''}"${expandable ? ` onclick="toggleReadinessRow('${rid}')"` : ''}>
+        <td class="space-chevron-cell">${expandable ? `<i class="ti ti-chevron-down space-chevron" id="${rid}-chev" aria-hidden="true"></i>` : ''}</td>
+        <td><span class="space-name">${r.space}</span>${r.roomNumber ? ` <span class="space-room-num">(${r.roomNumber})</span>` : ''}</td>
         <td class="sc">${makeDot(r.SDO  ? r.SDO.assessment  : null)}</td>
         <td class="sc">${makeDot(r.tech ? r.tech.assessment : null)}</td>
       </tr>`;
+
+      if (expandable) {
+        const countsLine = hasCounts
+          ? `<div class="space-detail-counts">${r.deskCount || '—'} desks · ${r.chairCount || '—'} chairs</div>`
+          : '';
+        const notesLine = hasNotes
+          ? `<div class="space-detail-notes">${r.notes}</div>`
+          : '';
+        html += `<tr class="space-detail-row hidden" id="${rid}"><td colspan="4">
+          ${countsLine}
+          ${notesLine}
+        </td></tr>`;
+      }
     });
     html += `</tbody></table></div>`;
   });
@@ -635,18 +688,33 @@ function buildSectionedTables(rooms) {
 // Per-campus signoff progress: counts individual signoff cells (Schools, Ops,
 // Tech) across all rooms — not whole spaces — so partial adoption still shows
 // real progress.
+// A "space" is only Fully Ready when both tracks that apply to it are Fully
+// Ready. If one track is N/A for that space, the other track alone decides.
+// Only ok+ok=ok, and ok+minor/minor+minor=minor — anything involving
+// bad/pending/not-assessed doesn't count as either.
+function combinedSpaceStatus(room) {
+  const sdoCls  = dotClass(room.SDO  ? room.SDO.assessment  : null);
+  const techCls = dotClass(room.tech ? room.tech.assessment : null);
+  const sdoNA  = sdoCls  === 'rdot-na';
+  const techNA = techCls === 'rdot-na';
+  if (sdoNA && techNA) return 'rdot-na';
+  function simplify(cls) { return (cls === 'rdot-ok' || cls === 'rdot-minor') ? cls : null; }
+  if (sdoNA)  return simplify(techCls) || 'rdot-blank';
+  if (techNA) return simplify(sdoCls)  || 'rdot-blank';
+  const a = simplify(sdoCls), b = simplify(techCls);
+  if (a === 'rdot-ok' && b === 'rdot-ok') return 'rdot-ok';
+  if (a && b) return 'rdot-minor';
+  return 'rdot-blank';
+}
+
 function buildCampusProgress(rooms) {
-  const tracks = ['SDO', 'tech'];
   let ok = 0, minor = 0, total = 0;
   rooms.forEach(r => {
-    tracks.forEach(track => {
-      const rec = track === 'tech' ? r.tech : r[track];
-      const cls = dotClass(rec ? rec.assessment : null);
-      if (cls === 'rdot-na') return;
-      total++;
-      if (cls === 'rdot-ok')    ok++;
-      if (cls === 'rdot-minor') minor++;
-    });
+    const cls = combinedSpaceStatus(r);
+    if (cls === 'rdot-na') return;
+    total++;
+    if (cls === 'rdot-ok')    ok++;
+    if (cls === 'rdot-minor') minor++;
   });
   if (!total) return '';
   const okPct    = Math.round(ok    / total * 100);
@@ -655,13 +723,9 @@ function buildCampusProgress(rooms) {
   const okSeg    = okPct    > 0 ? `<div class="seg-ok" style="width:${okPct}%"><span class="seg-label-ok">${okPct >= 8 ? okPct+'%' : ''}</span></div>` : '';
   const minorSeg = minorPct > 0 ? `<div class="seg-mn" style="width:${minorPct}%"><span class="seg-label-mn">${minorPct >= 8 ? minorPct+'%' : ''}</span></div>` : '';
   return `<div class="net-summary">
-    <div class="net-summary-title">Signoff Progress</div>
-    <div class="bar-legend">
-      <span class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--green)"></span>Fully ready</span>
-      <span class="bar-legend-item"><span class="bar-legend-swatch" style="background:var(--yellow)"></span>Minor items remain</span>
-    </div>
+    <div class="net-summary-title">Space Readiness Progress</div>
     <div class="kpi-pct">${combined}<span class="kpi-pct-unit">%</span></div>
-    <div class="kpi-bar-track">${okSeg}${minorSeg}</div>
+    <div class="kpi-bar-track" style="margin-bottom:24px">${okSeg}${minorSeg}</div>
   </div>`;
 }
 
@@ -679,7 +743,7 @@ function renderReadiness() {
     const body = rooms.length
       ? buildCampusProgress(rooms) + buildSectionedTables(rooms)
       : '<div class="no-data">No submissions yet for '+campus+'.</div>';
-    html += `<div class="card" id="panel-${campus}" style="${i>0?'display:none':''}">
+    html += `<div id="panel-${campus}" style="${i>0?'display:none':''}">
       ${body}
     </div>`;
   });
