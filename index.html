@@ -699,11 +699,14 @@ function combinedSpaceStatus(room) {
   const techNA = techCls === 'rdot-na';
   if (sdoNA && techNA) return 'rdot-na';
   function simplify(cls) { return (cls === 'rdot-ok' || cls === 'rdot-minor') ? cls : null; }
-  if (sdoNA)  return simplify(techCls) || 'rdot-blank';
-  if (techNA) return simplify(sdoCls)  || 'rdot-blank';
+  // Single-signoff spaces: minor from the one applicable track counts as ready.
+  if (sdoNA)  return simplify(techCls) ? 'rdot-ok' : 'rdot-blank';
+  if (techNA) return simplify(sdoCls)  ? 'rdot-ok' : 'rdot-blank';
   const a = simplify(sdoCls), b = simplify(techCls);
-  if (a === 'rdot-ok' && b === 'rdot-ok') return 'rdot-ok';
-  if (a && b) return 'rdot-minor';
+  if (a && b) {
+    if (a === 'rdot-ok' || b === 'rdot-ok') return 'rdot-ok';  // green/green or green/yellow
+    return 'rdot-minor';                                        // yellow/yellow
+  }
   return 'rdot-blank';
 }
 
