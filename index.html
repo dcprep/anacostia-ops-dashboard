@@ -111,6 +111,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .flag-item:last-child{border-bottom:none}
 .flag-name{color:var(--navy);flex:1;padding-right:10px}
 .flag-pct{color:var(--red);font-weight:500;flex-shrink:0}
+.consistent-pct{color:var(--green);font-weight:500;flex-shrink:0}
 
 /* CUSTODIAL */
 .sparkline{display:flex;align-items:flex-end;gap:3px;height:44px;margin:10px 0 2px}
@@ -218,19 +219,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 <div id="home">
   <div id="home-loading" class="loading-msg">Loading…</div>
   <div class="section-list" id="section-list" style="display:none">
-    <div class="section-card" onclick="go('drills')">
-      <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-      <div class="section-text">
-        <div class="section-name">Evacuation &amp; Lockdown Drills</div>
-        <div class="section-sub" id="sub-drills">Evacuation &amp; lockdown compliance</div>
-      </div>
-      <div class="section-arrow">›</div>
-    </div>
     <div class="section-card" onclick="go('arrival')">
       <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5"/><circle cx="16" cy="17" r="2"/><circle cx="7" cy="17" r="2"/><path d="M5 17H3m14 0h2m-4 0H9"/></svg></div>
       <div class="section-text">
         <div class="section-name">Arrival &amp; Dismissal</div>
         <div class="section-sub" id="sub-arrival">Last observation window</div>
+      </div>
+      <div class="section-arrow">›</div>
+    </div>
+    <div class="section-card" onclick="go('drills')">
+      <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div class="section-text">
+        <div class="section-name">Evacuation &amp; Lockdown Drills</div>
+        <div class="section-sub" id="sub-drills">Evacuation &amp; lockdown compliance</div>
       </div>
       <div class="section-arrow">›</div>
     </div>
@@ -497,6 +498,12 @@ function renderArrival() {
       const low = curr.n < 5;
       html += ratingTable(curr, prior);
       html += `<div class="n-lbl" style="color:${low?'#b45309':'var(--muted)'}">n = ${curr.n} (last ${WIN} days)${prior?' · n = '+prior.n+' (prior '+WIN+' days)':''}${low?' &nbsp;⚠ low volume':''}</div>`;
+      if (sData.top?.length) {
+        html += `<div class="flags-title" style="margin-top:14px">Most consistent</div>`;
+        sData.top.forEach(t => {
+          html += `<div class="flag-item"><span class="flag-name">${AD_LABELS[t.item]||t.item}</span><span class="consistent-pct">${t.rate}%</span></div>`;
+        });
+      }
       if (sData.flags?.length) {
         html += `<div class="flags-title">Improvement opportunities</div>`;
         sData.flags.forEach(f => {
