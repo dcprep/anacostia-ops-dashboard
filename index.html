@@ -10,6 +10,8 @@
 <meta name="application-name" content="Anacostia Ops Dashboard">
 <meta name="theme-color" content="#005E9E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMDA1RTlFIiByeD0iNiIvPjxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcng9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC45KSIvPjxyZWN0IHg9IjE4IiB5PSI0IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHJ4PSIyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiLz48cmVjdCB4PSI0IiB5PSIxOCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjkpIi8+PHJlY3QgeD0iMTgiIHk9IjE4IiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==">
 <link rel="apple-touch-icon" href="icon.png">
 <meta property="og:title" content="Anacostia Ops Dashboard">
@@ -134,6 +136,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .badge-focus{background:var(--red-lt);color:#991b1b;font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px}
 .badge-improving{background:var(--teal-lt);color:#0f6e56;font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px}
 .badge-stable{background:var(--lt);color:var(--muted);font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px}
+.badge-new{background:var(--lt);color:var(--muted);font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;margin-left:6px;font-style:italic}
 
 /* READINESS — ported from the main BOY Readiness Dashboard (AEC/AMC tab view) */
 .rdot{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700;line-height:1}
@@ -190,6 +193,77 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
   #app-loading-overlay{display:none !important}
   .space-chevron-cell{display:none !important}
 }
+
+/* CUSTODIAL / COMMON SPACE WALKTHROUGH CHARTS — ported from the main Ops Dashboard */
+.section{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.section-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
+.cust-chart-wrap{position:relative;width:100%;height:170px;margin-bottom:4px}
+.cust-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,.05)}
+.cust-row:last-child{border-bottom:none}
+.cust-row-name{color:var(--text);font-weight:500;flex:1;padding-right:10px}
+.cust-row-pct-good{color:var(--green);font-weight:600;flex-shrink:0}
+.cust-row-pct-bad{color:var(--red);font-weight:600;flex-shrink:0}
+
+/* ── walkthrough calendar (Custodial / Common Space) ── */
+.cal-table{border-collapse:collapse;width:100%}
+.cal-table th{font-size:10px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);padding:0 0 8px;text-align:center}
+.cal-table td{padding:3px;text-align:center;vertical-align:top;border-top:0.5px solid var(--border)}
+.cal-wk-lbl{font-size:9px;color:var(--muted);width:56px;text-align:left !important;padding-left:2px !important;white-space:nowrap}
+.cal-cell{min-height:38px;border-radius:6px;background:var(--lt);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:3px 4px;gap:3px}
+.cal-cell.today{box-shadow:0 0 0 1.5px var(--navy) inset}
+.cal-cell.has-events{cursor:pointer;transition:background .12s}
+.cal-cell.has-events:hover{background:#e2e8f0}
+.cal-date{font-size:9px;color:var(--muted)}
+.cal-dots{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:2px;max-width:34px}
+.cal-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.cal-legend-swatch{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* ── walkthrough calendar-day overlay ── */
+.walk-overlay{position:fixed;inset:0;z-index:2000;display:flex;align-items:flex-end;justify-content:center}
+.walk-overlay.hidden{display:none}
+.walk-overlay-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.45)}
+.walk-overlay-panel{position:relative;background:var(--card);width:100%;max-width:560px;max-height:86vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgba(0,0,0,.18);animation:walkSlideUp .18s ease-out}
+@media (min-width:600px){
+  .walk-overlay{align-items:center}
+  .walk-overlay-panel{border-radius:16px;margin-bottom:0}
+}
+@keyframes walkSlideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.walk-overlay-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:18px 20px 12px;border-bottom:0.5px solid var(--border)}
+.walk-overlay-title{font-size:15px;font-weight:700;color:var(--navy);line-height:1.35}
+.walk-overlay-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
+.walk-overlay-actions{display:flex;gap:6px;flex-shrink:0}
+.walk-btn{font-size:11px;font-weight:600;color:var(--navy);background:var(--lt);border:none;border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.walk-btn:active{background:var(--border)}
+.walk-btn-close{color:var(--muted);font-size:14px;padding:6px 9px}
+.walk-overlay-body{overflow-y:auto;padding:16px 20px 24px}
+.walk-back-btn{font-size:11px;font-weight:600;color:var(--teal);background:none;border:none;padding:0 0 12px;cursor:pointer}
+.walk-picker-list{display:flex;flex-direction:column;gap:8px}
+.walk-picker-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--lt);border:none;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer}
+.walk-picker-btn:active{background:var(--border)}
+.walk-picker-count{margin-left:auto;color:var(--muted);font-weight:500;font-size:11px}
+.walk-sub-card{border:0.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px}
+.walk-sub-card:last-child{margin-bottom:0}
+.walk-sub-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.walk-sub-time{font-size:12px;font-weight:700;color:var(--navy)}
+.walk-sub-meta{font-size:11px;color:var(--muted)}
+.walk-stat-strip{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.walk-stat{font-size:11px;color:var(--muted)}
+.walk-stat b{color:var(--navy);font-weight:700}
+.walk-item-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:0.5px solid var(--border);font-size:12.5px}
+.walk-item-row:first-of-type{border-top:none}
+.walk-item-name{color:var(--text);flex:1}
+.walk-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:9px;flex-shrink:0;white-space:nowrap}
+.walk-pill-ok{background:#dcfce7;color:#166534}
+.walk-pill-upkeep{background:#fef9c3;color:#92400e}
+.walk-pill-bad{background:var(--red-lt);color:#991b1b}
+.walk-pill-skip{background:var(--lt);color:var(--muted)}
+.walk-notes{margin-top:10px;font-size:12px;color:var(--text);background:var(--lt);border-radius:8px;padding:8px 10px}
+.walk-notes-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.walk-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;z-index:2100;opacity:0;pointer-events:none;transition:opacity .2s}
+.walk-toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -243,7 +317,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
       </div>
       <div class="section-arrow">›</div>
     </div>
-    <div class="section-card" onclick="go('readiness')">
+    <div class="section-card" onclick="go('commonspace')">
+      <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg></div>
+      <div class="section-text">
+        <div class="section-name">Common Space Walkthroughs</div>
+        <div class="section-sub" id="sub-commonspace">Walkthrough completion trend</div>
+      </div>
+      <div class="section-arrow">›</div>
+    </div>
+
+    <!-- HIDDEN per Charles (Sep 2026) -->
+    <div class="section-card" onclick="go('readiness')" style="display:none">
       <div class="cell-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 19h-3a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1"/><path d="M11 16m0 1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/></svg></div>
       <div class="section-text">
         <div class="section-name">BOY Building Readiness</div>
@@ -256,10 +340,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 </div>
 
 <!-- DETAIL SCREENS -->
-<div id="d-drills"    class="detail"></div>
-<div id="d-arrival"   class="detail"></div>
-<div id="d-custodial" class="detail"></div>
-<div id="d-readiness" class="detail"></div>
+<div id="d-drills"      class="detail"></div>
+<div id="d-arrival"     class="detail"></div>
+<div id="d-custodial"   class="detail"></div>
+<div id="d-commonspace" class="detail"></div>
+<div id="d-readiness"   class="detail"></div>
+
+<!-- ── WALKTHROUGH DAY OVERLAY (calendar click-through) ── -->
+<div class="walk-overlay hidden" id="walk-overlay">
+  <div class="walk-overlay-backdrop" onclick="closeWalkOverlay()"></div>
+  <div class="walk-overlay-panel">
+    <div class="walk-overlay-header">
+      <div>
+        <div class="walk-overlay-title" id="walk-overlay-title"></div>
+        <div class="walk-overlay-sub" id="walk-overlay-sub"></div>
+      </div>
+      <div class="walk-overlay-actions" id="walk-overlay-actions">
+        <button class="walk-btn" onclick="copyWalkOverlay()">Copy</button>
+        <button class="walk-btn" onclick="printWalkOverlay()">Print</button>
+        <button class="walk-btn walk-btn-close" onclick="closeWalkOverlay()">✕</button>
+      </div>
+    </div>
+    <div class="walk-overlay-body" id="walk-overlay-body"></div>
+  </div>
+</div>
+<div class="walk-toast" id="walk-toast">Copied</div>
 
 <script>
 
@@ -271,7 +376,7 @@ let OPS = null, BOY = {}, WIN = 14;
 
 // ── NAVIGATION ──────────────────────────────────────────────────────────
 function go(section) {
-  ['home','d-drills','d-arrival','d-custodial','d-readiness'].forEach(id => {
+  ['home','d-drills','d-arrival','d-custodial','d-commonspace','d-readiness'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.style.display = 'none'; el.classList.remove('active'); }
   });
@@ -287,10 +392,11 @@ function go(section) {
 }
 
 function render(s) {
-  if (s==='drills')    renderDrills();
-  if (s==='arrival')   renderArrival();
-  if (s==='custodial') renderCustodial();
-  if (s==='readiness') renderReadiness();
+  if (s==='drills')      renderDrills();
+  if (s==='arrival')     renderArrival();
+  if (s==='custodial')   renderCustodial();
+  if (s==='commonspace') renderCommonSpace();
+  if (s==='readiness')   renderReadiness();
 }
 
 function backBar(title) {
@@ -334,6 +440,7 @@ async function load() {
 
 function clusterArr() { return (OPS.arrival||[]).find(c=>c.cluster===CLUSTER); }
 function clusterCust(){ return (OPS.custodial||[]).find(c=>c.cluster===CLUSTER); }
+function clusterCommonSpace(){ return (OPS.commonSpace||[]).find(c=>c.cluster===CLUSTER); }
 
 function buildSubs() {
   // Drills — date of most recent drill across both campuses
@@ -356,6 +463,13 @@ function buildSubs() {
   document.getElementById('sub-custodial').textContent =
     cc?.currentPct !== null && cc?.currentPct !== undefined
       ? `${cc.currentPct}% items checked this period`
+      : 'No walkthroughs logged yet';
+
+  // Common Space Walkthrough
+  const csc = clusterCommonSpace();
+  document.getElementById('sub-commonspace').textContent =
+    csc?.currentPct !== null && csc?.currentPct !== undefined
+      ? `${csc.currentPct}% spaces well kept this period`
       : 'No walkthroughs logged yet';
 
   // Readiness (BOY Building Readiness — space readiness across all spaces)
@@ -517,75 +631,483 @@ function renderArrival() {
   con.innerHTML = html;
 }
 
-// ── CUSTODIAL ─────────────────────────────────────────────────────────────
+// ── CUSTODIAL / COMMON SPACE WALKTHROUGHS — ported from the main Ops Dashboard ──
+const CUSTODIAL_MONTHS = ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'];
+const CUSTODIAL_BAR_COLOR = '#0083C4';
+const CUSTODIAL_WEEKDAY_COLS = ['Mon','Tue','Wed','Thu','Fri'];
+// This dashboard is scoped to one cluster (Anacostia) but that cluster still
+// has two physical campuses (AEC/AMC), which is exactly the "different
+// campuses, same day" case the calendar overlay's picker exists for — so
+// dots/legend/picker are keyed by campus code here, not by cluster (the
+// main dashboard's CLUSTER_COLOR), since cluster would be the same for both.
+const CAMPUS_NAMES = { AEC: 'Anacostia Elementary', AMC: 'Anacostia Middle' };
+const CAMPUS_COLOR = { AEC: 'var(--navy)', AMC: 'var(--teal)' };
+
+let custodialCharts = [];
+let commonSpaceCharts = [];
+
+// Splits an item like "Cafeteria — Tables sanitized between lunches" into
+// {name, space} — custodial checklist item keys are prefixed with the
+// space they belong to; Common Space's are plain space names.
+function splitCustodialItem(raw) {
+  if (raw.includes(' — ')) {
+    const [space, name] = raw.split(' — ');
+    return { name, space };
+  }
+  return { name: raw, space: '' };
+}
+
 function renderCustodial() {
   const con = document.getElementById('d-custodial');
+  custodialCharts.forEach(c => c && c.destroy());
+  custodialCharts = [];
   const cl = clusterCust();
-  const cw = cl?.window || WIN;
+
   let html = backBar('Custodial Walkthroughs') + '<div class="detail-body">';
-  if (!cl) { html += '<div class="no-data">No custodial data available.</div></div>'; con.innerHTML=html; return; }
+  if (!cl) { html += buildCustodialCalendarSection() + '</div>'; con.innerHTML = html; return; }
 
-  const pct = cl.currentPct, prev = cl.priorPct;
-  const pc = pct===null?'var(--muted)':pct>=80?'var(--teal)':pct>=65?'var(--amber)':'var(--red)';
-  html += '<div class="card"><div class="card-label">% items checked</div>';
-  html += `<div class="pct-big" style="color:${pc}">${pct!==null?pct+'%':'—'}</div>`;
-  html += `<div style="font-size:11px;color:var(--muted);margin-top:4px">${cl.n>0?`Based on ${cl.n} walkthrough${cl.n>1?'s':''} in last ${cw} days`:'No walkthroughs in this period'}</div>`;
-  if (prev!==null && pct!==null) {
-    const d=pct-prev;
-    const a=d>=3?'↑':d<=-3?'↓':'→';
-    const ac=d>=3?'var(--teal)':d<=-3?'var(--amber)':'var(--muted)';
-    html += `<div style="font-size:12px;color:var(--muted);margin-top:4px">${a} from <span style="color:${ac}">${prev}%</span> prior period</div>`;
+  const cw = cl.window || WIN;
+  const chartId = 'custodial-chart-0';
+
+  html += `<div class="section">
+    <div class="section-title">Percent of Walkthrough Items Checked by Month</div>
+    <div class="section-sub">${cl.n > 0 ? 'Based on ' + cl.n + ' walkthrough' + (cl.n>1?'s':'') + ' in last ' + cw + ' days' : 'No walkthroughs in this period'}</div>
+    <div class="cust-chart-wrap"><canvas id="${chartId}"></canvas></div>
+  </div>`;
+
+  html += `<div class="section">
+    <div class="section-title" style="margin-bottom:2px">Most Consistent Items</div>
+    <div class="section-sub">Items checked off (not flagged) most often across recent walkthroughs</div>`;
+  if (cl.topConsistent?.length) {
+    cl.topConsistent.forEach(t => {
+      const { name, space } = splitCustodialItem(t.item);
+      html += `<div class="cust-row"><span class="cust-row-name">${name}${space?`<span style="font-size:10px;color:var(--muted);display:block;margin-top:1px">${space}</span>`:''}</span><span class="cust-row-pct-good">${t.rate}%</span></div>`;
+    });
+  } else {
+    html += `<div class="no-data">Not enough walkthroughs yet to identify a pattern.</div>`;
   }
-  const sparks = (cl.trend||[]).map(m => {
-    if (m.pct===null) return `<div class="spark-bar spark-null" style="height:20%"></div>`;
-    const cls=m.pct>=80?'spark-good':m.pct>=65?'spark-mid':'spark-low';
-    return `<div class="spark-bar ${cls}" style="height:${Math.max(20,m.pct)}%" title="${m.label}: ${m.pct}%"></div>`;
-  }).join('');
-  html += `<div class="sparkline">${sparks}</div>`;
-  const lbls = (cl.trend||[]).map(m=>`<span style="font-size:9px;color:var(--muted);flex:1;text-align:center">${m.label}</span>`).join('');
-  html += `<div style="display:flex;gap:3px">${lbls}</div></div>`;
+  html += `</div>`;
 
-  // Where we can improve — item-level flag frequency
+  html += `<div class="section">
+    <div class="section-title" style="margin-bottom:2px">Where We Can Improve</div>
+    <div class="section-sub">% of walkthroughs in the last ${cw} days where the item was flagged as a problem</div>`;
   if (cl.flags?.length) {
-    html += '<div class="card"><div class="card-label">Where we can improve</div>';
     cl.flags.forEach(f => {
-      const itemName = f.item.includes(' — ') ? f.item.split(' — ')[1] : f.item;
-      const spaceName = f.item.includes(' — ') ? f.item.split(' — ')[0] : '';
-      const bc = f.trend==='focus' ? 'badge-focus' : f.trend==='improving' ? 'badge-improving' : 'badge-stable';
-      const bl = f.trend==='focus' ? 'Focus area' : f.trend==='improving' ? 'Improving' : 'Stable';
-      html += `<div class="improve-item">
-        <div style="flex:1">
-          <span class="improve-name">${itemName}</span>
-          ${spaceName ? `<span style="font-size:10px;color:var(--muted);display:block;margin-top:2px">${spaceName}</span>` : ''}
-          <span class="${bc}">${bl}</span>
-        </div>
-        <div class="improve-right">
-          <span class="flag-rate-val">${f.curr}%</span>
-          <span class="prior-rate-val">${f.prior}% prior</span>
-        </div>
-      </div>`;
+      const { name, space } = splitCustodialItem(f.item);
+      const bc = f.trend==='focus'?'badge-focus':f.trend==='improving'?'badge-improving':f.trend==='new'?'badge-new':'badge-stable';
+      const bl = f.trend==='focus'?'Focus area':f.trend==='improving'?'Improving':f.trend==='new'?'New':'Stable';
+      html += `<div class="cust-row"><span class="cust-row-name">${name}${space?`<span style="font-size:10px;color:var(--muted);display:block;margin-top:1px">${space}</span>`:''}<span class="${bc}">${bl}</span></span><span class="cust-row-pct-bad">${f.curr}% flagged</span></div>`;
     });
-    html += '</div>';
+  } else {
+    html += `<div class="no-data">Nothing flagged with enough walkthroughs yet to trust the rate.</div>`;
   }
-  // Walkthrough notes
-  if (cl.notes?.length) {
-    html += '<div class="card"><div class="card-label">Walkthrough notes</div>';
-    cl.notes.forEach(n => {
-      html += `<div style="font-size:12px;color:var(--text);padding:8px 0;border-bottom:0.5px solid var(--border);line-height:1.5">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:3px">${n.campus} · ${n.date} · ${n.role}</div>
-        ${n.note}
-      </div>`;
-    });
-    html += '</div>';
-  }
+  html += `</div>`;
 
   if (cl.notes?.length) {
-    html += '<div class="card"><div class="card-label">Recent notes</div>';
-    cl.notes.forEach(n => { html += `<div style="font-size:12px;color:var(--text);padding:6px 0;border-bottom:0.5px solid var(--border)">${n.note}</div>`; });
-    html += '</div>';
+    html += `<div class="section"><div class="section-title" style="margin-bottom:10px">Walkthrough Notes</div>`;
+    cl.notes.forEach(n => { html += `<div style="font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--border)">${n.note}</div>`; });
+    html += `</div>`;
   }
+
+  html += buildCustodialCalendarSection();
   html += '</div>';
   con.innerHTML = html;
+  custodialCharts.push(renderCustodialChart(chartId, cl.trend || []));
+}
+
+// Same view and logic as Custodial above, with one deliberate difference in
+// what counts as "good": Common Space Walkthrough has three tiers per space
+// (good/upkeep/flag — shown to the person submitting as "Well kept" /
+// "Needs improvement" / "Major issues") rather than Custodial's plain
+// checked/flagged. Only "Well kept" counts toward the checked % and the
+// headline chart; "Needs improvement" AND "Major issues" both land in
+// "Where We Can Improve".
+function renderCommonSpace() {
+  const con = document.getElementById('d-commonspace');
+  commonSpaceCharts.forEach(c => c && c.destroy());
+  commonSpaceCharts = [];
+  const cl = clusterCommonSpace();
+
+  let html = backBar('Common Space Walkthroughs') + '<div class="detail-body">';
+  if (!cl) { html += buildCommonSpaceCalendarSection() + '</div>'; con.innerHTML = html; return; }
+
+  const cw = cl.window || WIN;
+  const chartId = 'commonspace-chart-0';
+
+  html += `<div class="section">
+    <div class="section-title">Percent of Spaces Well Kept by Month</div>
+    <div class="section-sub">${cl.n > 0 ? 'Based on ' + cl.n + ' walkthrough' + (cl.n>1?'s':'') + ' in last ' + cw + ' days' : 'No walkthroughs in this period'}</div>
+    <div class="cust-chart-wrap"><canvas id="${chartId}"></canvas></div>
+  </div>`;
+
+  html += `<div class="section">
+    <div class="section-title" style="margin-bottom:2px">Most Consistent Items</div>
+    <div class="section-sub">Spaces marked well kept most often across recent walkthroughs</div>`;
+  if (cl.topConsistent?.length) {
+    cl.topConsistent.forEach(t => {
+      html += `<div class="cust-row"><span class="cust-row-name">${t.item}</span><span class="cust-row-pct-good">${t.rate}%</span></div>`;
+    });
+  } else {
+    html += `<div class="no-data">Not enough walkthroughs yet to identify a pattern.</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="section">
+    <div class="section-title" style="margin-bottom:2px">Where We Can Improve</div>
+    <div class="section-sub">% of walkthroughs in the last ${cw} days where the space was marked "Needs improvement" or "Major issues"</div>`;
+  if (cl.flags?.length) {
+    cl.flags.forEach(f => {
+      const bc = f.trend==='focus'?'badge-focus':f.trend==='improving'?'badge-improving':f.trend==='new'?'badge-new':'badge-stable';
+      const bl = f.trend==='focus'?'Focus area':f.trend==='improving'?'Improving':f.trend==='new'?'New':'Stable';
+      html += `<div class="cust-row"><span class="cust-row-name">${f.item}<span class="${bc}">${bl}</span></span><span class="cust-row-pct-bad">${f.curr}% flagged</span></div>`;
+    });
+  } else {
+    html += `<div class="no-data">Nothing flagged with enough walkthroughs yet to trust the rate.</div>`;
+  }
+  html += `</div>`;
+
+  html += buildCommonSpaceCalendarSection();
+  html += '</div>';
+  con.innerHTML = html;
+  commonSpaceCharts.push(renderCustodialChart(chartId, cl.trend || [], '% of spaces well kept'));
+}
+
+function renderCustodialChart(canvasId, trend, tooltipSuffix) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return null;
+  const labels = CUSTODIAL_MONTHS;
+  const values = CUSTODIAL_MONTHS.map((m, i) => trend[i] ? trend[i].pct : null);
+  const suffix = tooltipSuffix || '% of items checked';
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: CUSTODIAL_BAR_COLOR,
+        borderRadius: 4,
+        borderSkipped: false,
+        maxBarThickness: 36,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (c) => c.raw === null ? 'No data yet' : c.raw + suffix }
+        },
+        datalabels: {
+          anchor: 'end', align: 'end', offset: 2,
+          color: '#1e293b', font: { size: 11, weight: 700 },
+          formatter: (v) => v === null ? '' : v + '%',
+        }
+      },
+      scales: {
+        y: { display:false, min:0, max:100 },
+        x: { grid:{ display:false }, ticks:{ color:'#94a3b8', font:{size:10} } }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// ── Walkthrough Frequency calendar — dots colored by campus (AEC/AMC) ──
+// dateKey ('YYYY-MM-DD') -> array of that day's full submission objects,
+// per calendar type. Populated by buildWalkCalendar() below and read by
+// openWalkOverlay() on a day-cell click.
+let CAL_DATA = { custodial: {}, commonspace: {} };
+
+// Same 10-space order used in the Ops App submission flow (CUST_SPACES), so
+// a Common Space Walkthrough's ratings list reads in walked order, not
+// object-key order.
+const COMMONSPACE_ORDER = ["Lobby", "Hallways", "Classrooms", "Offices and conference rooms", "Nurse suite", "Staff restrooms", "Student restrooms", "Cafeteria", "Gymnasium", "Stairwells and common areas"];
+
+function buildWalkCalendar(events, type) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const byDay = {};
+  events.forEach(e => {
+    const key = e.date.toISOString().slice(0,10);
+    (byDay[key] = byDay[key] || []).push(e);
+  });
+  CAL_DATA[type] = byDay;
+
+  const dow = today.getDay();
+  const daysSinceMonday = (dow + 6) % 7;
+  const thisMonday = new Date(today);
+  thisMonday.setDate(thisMonday.getDate() - daysSinceMonday);
+  const firstMonday = new Date(thisMonday);
+  firstMonday.setDate(firstMonday.getDate() - 21);
+
+  const weeks = [];
+  for (let w = 0; w < 4; w++) {
+    const weekStart = new Date(firstMonday);
+    weekStart.setDate(weekStart.getDate() + w * 7);
+    const days = [];
+    for (let d = 0; d < 5; d++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + d);
+      const key = day.toISOString().slice(0,10);
+      days.push({ date: day, isToday: day.getTime() === today.getTime(), items: byDay[key] || [] });
+    }
+    weeks.push({ start: days[0].date, end: days[4].date, days });
+  }
+
+  const fmt = d => d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+
+  let html = `<table class="cal-table"><thead><tr><th class="cal-wk-lbl"></th>` +
+    CUSTODIAL_WEEKDAY_COLS.map(w => `<th>${w}</th>`).join('') + `</tr></thead><tbody>`;
+  weeks.forEach(week => {
+    html += `<tr><td class="cal-wk-lbl">${fmt(week.start)}–${fmt(week.end)}</td>`;
+    week.days.forEach(day => {
+      const dots = day.items.map(e => `<span class="cal-dot" style="background:${CAMPUS_COLOR[e.campusCode] || 'var(--navy)'}" title="${CAMPUS_NAMES[e.campusCode] || e.campusCode} — ${fmt(day.date)}"></span>`).join('');
+      const dateKey = day.date.toISOString().slice(0,10);
+      const clickable = day.items.length > 0;
+      html += `<td><div class="cal-cell${day.isToday ? ' today' : ''}${clickable ? ' has-events' : ''}"${clickable ? ` onclick="openWalkOverlay('${type}','${dateKey}')"` : ''}>
+        <span class="cal-date">${day.date.getDate()}</span>
+        <div class="cal-dots">${dots}</div>
+      </div></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function buildCustodialCalendarSection() {
+  const events = (OPS.custodialCalendar || [])
+    .filter(e => CAMPUSES.includes(e.campusCode))
+    .map(e => ({ ...e, date: new Date(e.ts) }))
+    .filter(e => { e.date.setHours(0,0,0,0); const d = e.date.getDay(); return d !== 0 && d !== 6; });
+
+  const legend = CAMPUSES.map(code =>
+    `<span class="cal-legend-item"><span class="cal-legend-swatch" style="background:${CAMPUS_COLOR[code]}"></span>${CAMPUS_NAMES[code] || code}</span>`).join('');
+
+  return `<div style="font-size:18px;font-weight:700;color:var(--navy);margin:24px 0 14px">Walkthrough Frequency</div>
+    <div class="section">
+      <div class="section-title" style="margin-bottom:2px">Walkthroughs Logged</div>
+      <div class="section-sub">Last 4 weeks — click a day to see what was submitted</div>
+      <div class="cal-legend">${legend}</div>
+      ${buildWalkCalendar(events, 'custodial')}
+    </div>`;
+}
+
+function buildCommonSpaceCalendarSection() {
+  const events = (OPS.commonSpaceCalendar || [])
+    .filter(e => CAMPUSES.includes(e.campusCode))
+    .map(e => ({ ...e, date: new Date(e.ts) }))
+    .filter(e => { e.date.setHours(0,0,0,0); const d = e.date.getDay(); return d !== 0 && d !== 6; });
+
+  const legend = CAMPUSES.map(code =>
+    `<span class="cal-legend-item"><span class="cal-legend-swatch" style="background:${CAMPUS_COLOR[code]}"></span>${CAMPUS_NAMES[code] || code}</span>`).join('');
+
+  return `<div style="font-size:18px;font-weight:700;color:var(--navy);margin:24px 0 14px">Walkthrough Frequency</div>
+    <div class="section">
+      <div class="section-title" style="margin-bottom:2px">Walkthroughs Logged</div>
+      <div class="section-sub">Last 4 weeks — click a day to see what was submitted</div>
+      <div class="cal-legend">${legend}</div>
+      ${buildWalkCalendar(events, 'commonspace')}
+    </div>`;
+}
+
+// ── WALKTHROUGH DAY OVERLAY ──────────────────────────────────────────────────
+// Click-through for the Custodial / Common Space calendars. Grouping rule
+// (per Charles): submissions from the same campus on the same day are shown
+// together in one view; if the day has submissions from more than one
+// campus (i.e. both AEC and AMC walked the same day), the user picks which
+// campus to view first.
+let walkOverlayCtx = null; // { type, dateKey, dateLabel, events, groups: {campusCode: [...]} }
+
+function fmtWalkDate(dateKey) {
+  const d = new Date(dateKey + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+}
+function fmtWalkTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+
+function openWalkOverlay(type, dateKey) {
+  const events = (CAL_DATA[type] && CAL_DATA[type][dateKey]) || [];
+  if (!events.length) return;
+
+  const groups = {};
+  events.forEach(e => { (groups[e.campusCode] = groups[e.campusCode] || []).push(e); });
+  Object.keys(groups).forEach(code => groups[code].sort((a,b) => a.ts - b.ts));
+
+  walkOverlayCtx = { type, dateKey, dateLabel: fmtWalkDate(dateKey), events, groups };
+  document.getElementById('walk-overlay').classList.remove('hidden');
+
+  const codes = Object.keys(groups);
+  if (codes.length > 1) {
+    renderWalkPicker();
+  } else {
+    renderWalkDetail(codes[0]);
+  }
+}
+
+function closeWalkOverlay() {
+  document.getElementById('walk-overlay').classList.add('hidden');
+  walkOverlayCtx = null;
+}
+
+function renderWalkPicker() {
+  const ctx = walkOverlayCtx;
+  document.getElementById('walk-overlay-title').textContent = ctx.dateLabel;
+  document.getElementById('walk-overlay-sub').textContent = 'Submitted from more than one campus — choose one';
+  document.getElementById('walk-overlay-actions').style.display = 'none';
+
+  let html = '<div class="walk-picker-list">';
+  Object.keys(ctx.groups).forEach(code => {
+    const group = ctx.groups[code];
+    html += `<button class="walk-picker-btn" onclick="renderWalkDetail('${code}')">
+      <span class="cal-dot" style="background:${CAMPUS_COLOR[code] || 'var(--navy)'}"></span>
+      <span>${CAMPUS_NAMES[code] || code}</span>
+      <span class="walk-picker-count">${group.length} submission${group.length > 1 ? 's' : ''}</span>
+    </button>`;
+  });
+  html += '</div>';
+  document.getElementById('walk-overlay-body').innerHTML = html;
+}
+
+function renderWalkDetail(campusCode) {
+  const ctx = walkOverlayCtx;
+  const group = ctx.groups[campusCode];
+  const showBack = Object.keys(ctx.groups).length > 1;
+
+  document.getElementById('walk-overlay-title').textContent = `${CAMPUS_NAMES[campusCode] || campusCode} — ${ctx.dateLabel}`;
+  document.getElementById('walk-overlay-sub').textContent = `${group.length} submission${group.length > 1 ? 's' : ''}`;
+  document.getElementById('walk-overlay-actions').style.display = '';
+
+  const body = ctx.type === 'custodial'
+    ? group.map(walkCustodialCardHTML).join('')
+    : group.map(walkCommonSpaceCardHTML).join('');
+
+  document.getElementById('walk-overlay-body').innerHTML =
+    (showBack ? `<button class="walk-back-btn" onclick="renderWalkPicker()">‹ Back to campuses</button>` : '') + body;
+}
+
+function walkPill(status) {
+  if (status === 'checked' || status === 'good') return `<span class="walk-pill walk-pill-ok">${status === 'good' ? 'Well kept' : 'Checked'}</span>`;
+  if (status === 'upkeep') return `<span class="walk-pill walk-pill-upkeep">Needs improvement</span>`;
+  if (status === 'flagged' || status === 'flag') return `<span class="walk-pill walk-pill-bad">${status === 'flag' ? 'Major issues' : 'Flagged'}</span>`;
+  if (status === 'skipped') return `<span class="walk-pill walk-pill-skip">Skipped</span>`;
+  return `<span class="walk-pill walk-pill-skip">No input</span>`;
+}
+
+function walkCustodialCardHTML(e) {
+  const items = Object.keys(e.checks || {});
+  const rows = items.map(item => `<div class="walk-item-row"><span class="walk-item-name">${item}</span>${walkPill(e.checks[item])}</div>`).join('');
+  return `<div class="walk-sub-card">
+    <div class="walk-sub-head">
+      <span class="walk-sub-time">${fmtWalkTime(e.ts)}</span>
+      <span class="walk-sub-meta">${e.role || ''}${e.checklistType ? ' • ' + e.checklistType : ''}</span>
+    </div>
+    <div class="walk-stat-strip">
+      <span class="walk-stat"><b>${e.itemsChecked ?? 0}</b> checked</span>
+      <span class="walk-stat"><b>${e.itemsFlagged ?? 0}</b> flagged</span>
+    </div>
+    ${rows || '<div class="no-data">No checklist detail on this submission.</div>'}
+    ${e.notes ? `<div class="walk-notes"><div class="walk-notes-lbl">Notes</div>${e.notes}</div>` : ''}
+  </div>`;
+}
+
+function walkCommonSpaceCardHTML(e) {
+  const ratings = e.ratings || {};
+  const spaces = COMMONSPACE_ORDER.filter(s => ratings[s]).concat(Object.keys(ratings).filter(s => !COMMONSPACE_ORDER.includes(s)));
+  const rows = spaces.map(sp => `<div class="walk-item-row"><span class="walk-item-name">${sp}</span>${walkPill(ratings[sp])}</div>`).join('');
+  return `<div class="walk-sub-card">
+    <div class="walk-sub-head">
+      <span class="walk-sub-time">${fmtWalkTime(e.ts)}</span>
+      <span class="walk-sub-meta">${e.name || ''}</span>
+    </div>
+    <div class="walk-stat-strip">
+      <span class="walk-stat"><b>${e.spacesGood ?? 0}</b> well kept</span>
+      <span class="walk-stat"><b>${e.spacesUpkeep ?? 0}</b> needs improvement</span>
+      <span class="walk-stat"><b>${e.spacesFlagged ?? 0}</b> major issues</span>
+      ${e.spacesSkipped ? `<span class="walk-stat"><b>${e.spacesSkipped}</b> skipped</span>` : ''}
+    </div>
+    ${rows || '<div class="no-data">No space detail on this submission.</div>'}
+    ${e.notes ? `<div class="walk-notes"><div class="walk-notes-lbl">Notes</div>${e.notes}</div>` : ''}
+  </div>`;
+}
+
+function walkOverlayPlainText() {
+  const title = document.getElementById('walk-overlay-title').textContent;
+  const sub = document.getElementById('walk-overlay-sub').textContent;
+  let out = `${title}\n${sub}\n`;
+  const body = document.getElementById('walk-overlay-body');
+  body.querySelectorAll('.walk-sub-card').forEach(card => {
+    out += '\n' + '—'.repeat(30) + '\n';
+    out += (card.querySelector('.walk-sub-time')?.textContent || '') + '  ' + (card.querySelector('.walk-sub-meta')?.textContent || '') + '\n';
+    card.querySelectorAll('.walk-stat').forEach(s => out += s.textContent.trim() + '   ');
+    out += '\n';
+    card.querySelectorAll('.walk-item-row').forEach(row => {
+      const name = row.querySelector('.walk-item-name')?.textContent || '';
+      const pill = row.querySelector('.walk-pill')?.textContent || '';
+      out += `  ${name}: ${pill}\n`;
+    });
+    const notes = card.querySelector('.walk-notes');
+    if (notes) out += 'Notes: ' + notes.textContent.replace('Notes','').trim() + '\n';
+  });
+  return out;
+}
+
+function showWalkToast(msg) {
+  const toast = document.getElementById('walk-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1600);
+}
+
+function copyWalkOverlay() {
+  const text = walkOverlayPlainText();
+  const done = () => showWalkToast('Copied to clipboard');
+  const fail = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (err) { showWalkToast('Could not copy'); }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, fail);
+  } else {
+    fail();
+  }
+}
+
+function printWalkOverlay() {
+  const title = document.getElementById('walk-overlay-title').textContent;
+  const sub = document.getElementById('walk-overlay-sub').textContent;
+  const bodyHTML = document.getElementById('walk-overlay-body').innerHTML;
+  const w = window.open('', '_blank', 'width=700,height=900');
+  if (!w) { showWalkToast('Enable pop-ups to print'); return; }
+  w.document.write(`<!doctype html><html><head><title>${title}</title><style>
+    body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1e293b;padding:28px;max-width:640px;margin:0 auto}
+    h1{font-size:17px;color:#005E9E;margin:0 0 2px}
+    .sub{font-size:12px;color:#64748b;margin-bottom:18px}
+    .walk-back-btn{display:none}
+    .walk-sub-card{border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-bottom:14px;page-break-inside:avoid}
+    .walk-sub-head{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:8px}
+    .walk-stat-strip{display:flex;gap:14px;font-size:11px;color:#64748b;margin-bottom:8px}
+    .walk-item-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #f1f5f9;font-size:12px}
+    .walk-item-row:first-of-type{border-top:none}
+    .walk-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:9px}
+    .walk-pill-ok{background:#dcfce7;color:#166534}
+    .walk-pill-upkeep{background:#fef9c3;color:#92400e}
+    .walk-pill-bad{background:#fef2f2;color:#991b1b}
+    .walk-pill-skip{background:#f1f5f9;color:#94a3b8}
+    .walk-notes{margin-top:8px;font-size:12px;background:#f8fafc;border-radius:6px;padding:8px 10px}
+    .walk-notes-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:3px}
+  </style></head><body>
+    <h1>${title}</h1><div class="sub">${sub}</div>
+    ${bodyHTML}
+  </body></html>`);
+  w.document.close();
+  w.onload = () => { w.focus(); w.print(); };
+  setTimeout(() => { w.focus(); w.print(); }, 300);
 }
 
 // ── READINESS — ported from the main BOY Readiness Dashboard ───────────────
